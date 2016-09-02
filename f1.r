@@ -4,6 +4,7 @@ library(XML)
 library(RCurl)
 library(stringr)
 library(ggplot2)
+library(stats)
 
 # url de interesse
 
@@ -46,13 +47,25 @@ summary(pilotos.numeros)
 # correlacao entre pole positions e vitorias
 
 cor.test(pilotos.numeros$Poles, pilotos.numeros$Wins, method="spearman")
-ggplot(pilotos.numeros, aes(x=Poles, y=Wins)) + geom_point(size=2, alpha=0.25) + xlab("Pole Positions") + ylab("Vitórias")
+ggplot(pilotos.numeros, aes(x=Poles, y=Wins)) + geom_point(size=2, alpha=0.25) + xlab("Pole Positions") + ylab("Vit�rias")
 
 # clusterizacao feita por pilotos, tentando encontrar os mais parecidos entre si
 
-pilotos.dist <- dist(pilotos.numeros, method="manhattan")
+# normalizacao das variaveis - sugestão de Gustavo Fontoura
+pilotos.numeros.norm <- pilotos.numeros
+pilotos.numeros.norm$Championships <- pilotos.numeros.norm$Championships/sum(pilotos.numeros$Championships)
+pilotos.numeros.norm$Entries <- pilotos.numeros.norm$Entries/sum(pilotos.numeros$Entries)
+pilotos.numeros.norm$Starts <- pilotos.numeros.norm$Starts/sum(pilotos.numeros$Starts)
+pilotos.numeros.norm$Poles <- pilotos.numeros.norm$Poles/sum(pilotos.numeros$Poles)
+pilotos.numeros.norm$Wins <- pilotos.numeros.norm$Wins/sum(pilotos.numeros$Wins)
+pilotos.numeros.norm$Podiums <- pilotos.numeros.norm$Podiums/sum(pilotos.numeros$Podiums)
+pilotos.numeros.norm$`Fastest laps` <- pilotos.numeros.norm$`Fastest laps`/sum(pilotos.numeros$`Fastest laps`)
 
-pilotos.cluster <- hclust(pilotos.dist)
+pilotos.dist <- dist(pilotos.numeros.norm, method="manhattan")
+
+pilotos.cluster <- hclust(pilotos.dist,method = "average")
+pp <- as.dendrogram(pilotos.cluster)
+plot(pp)
 
 # pca
 
@@ -78,4 +91,3 @@ plot(pca$x[, 1], pca$x[, 2], col=as.numeric(cutree(pilotos.cluster, k=3)), xlab=
 pilotos.numeros[cutree(pilotos.cluster, k=3)==1, ]
 pilotos.numeros[cutree(pilotos.cluster, k=3)==2, ]
 pilotos.numeros[cutree(pilotos.cluster, k=3)==3, ]
-
