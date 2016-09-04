@@ -1,10 +1,8 @@
 # bibliotecas necessarias
-rm(list=ls())
 
 library(XML)
 library(RCurl)
 library(stringr)
-library(caret)
 library(ggplot2)
 
 # url de interesse
